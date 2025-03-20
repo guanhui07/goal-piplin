@@ -60,15 +60,16 @@ func CopyProject(targetProject *models.Project, fields contracts.Fields) (*model
 	project := models.Projects().Create(fields)
 	environmentsMap := make(map[int]int)
 
-	models.ProjectEnvironments().Where("project_id", targetProject.Id).Get().Foreach(func(i int, env *models.ProjectEnvironment) {
+	logic1 := func(i int, env *models.ProjectEnvironment) {
 		environmentsMap[env.Id] = models.ProjectEnvironments().Create(contracts.Fields{
 			"project_id": project.Id,
 			"name":       env.Name,
 			"settings":   env.Settings,
 		}).Id
-	})
+	}
+	models.ProjectEnvironments().Where("project_id", targetProject.Id).Get().Foreach(logic1)
 
-	models.Commands().Where("project_id", targetProject.Id).Get().Foreach(func(i int, command *models.Command) {
+	logic2 := func(i int, command *models.Command) {
 		models.Commands().Create(contracts.Fields{
 			"name":       command.Name,
 			"project_id": project.Id,
@@ -82,9 +83,10 @@ func CopyProject(targetProject *models.Project, fields contracts.Fields) (*model
 			"optional":         command.Optional,
 			"default_selected": command.DefaultSelected,
 		})
-	})
+	}
+	models.Commands().Where("project_id", targetProject.Id).Get().Foreach(logic2)
 
-	models.ConfigFiles().Where("project_id", targetProject.Id).Get().Foreach(func(i int, config *models.ConfigFile) {
+	logic3 := func(i int, config *models.ConfigFile) {
 		models.ConfigFiles().Create(contracts.Fields{
 			"project_id": project.Id,
 			"name":       config.Name,
@@ -94,15 +96,17 @@ func CopyProject(targetProject *models.Project, fields contracts.Fields) (*model
 				return environmentsMap[envId]
 			}).ToArray(),
 		})
-	})
+	}
+	models.ConfigFiles().Where("project_id", targetProject.Id).Get().Foreach(logic3)
 
-	models.ShareFiles().Where("project_id", targetProject.Id).Get().Foreach(func(i int, share *models.ShareFile) {
+	logic4 := func(i int, share *models.ShareFile) {
 		models.ShareFiles().Create(contracts.Fields{
 			"project_id": project.Id,
 			"name":       share.Name,
 			"path":       share.Path,
 		})
-	})
+	}
+	models.ShareFiles().Where("project_id", targetProject.Id).Get().Foreach(logic4)
 
 	return project, nil
 }
