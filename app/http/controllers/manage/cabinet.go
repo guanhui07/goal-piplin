@@ -8,6 +8,8 @@ import (
 
 func GetCabinets(request contracts.HttpRequest, guard contracts.Guard) any {
 	user := guard.User().(*models.User)
+	perPageSize := request.Int64Optional("perPageSize", 10)
+	page := request.Int64Optional("current", 1)
 	list, total := models.Cabinets().
 		OrderByDesc("id").
 		When(request.GetString("name") != "", func(q contracts.Query[models.Cabinet]) contracts.Query[models.Cabinet] {
@@ -16,7 +18,7 @@ func GetCabinets(request contracts.HttpRequest, guard contracts.Guard) any {
 		When(user.Role != "admin", func(q contracts.Query[models.Cabinet]) contracts.Query[models.Cabinet] {
 			return q.Where("creator_id", user.Id)
 		}).
-		Paginate(request.Int64Optional("pageSize", 10), request.Int64Optional("current", 1))
+		Paginate(perPageSize, page)
 	return contracts.Fields{
 		"total": total,
 		"data":  list.ToArray(),
