@@ -13,12 +13,13 @@ func CreateKey(creatorId string, name string) (*models.Key, error) {
 	if err != nil {
 		return nil, err
 	}
-	return models.Keys().CreateE(contracts.Fields{
+	ret, exception := models.Keys().CreateE(contracts.Fields{
 		"creator_id":  creatorId,
 		"name":        name,
 		"public_key":  publicKey,
 		"private_key": privateKey,
 	})
+	return ret, exception
 }
 
 func DeleteKeys(id any) error {

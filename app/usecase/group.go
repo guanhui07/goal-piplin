@@ -40,9 +40,10 @@ func HasGroupPermission(group *models.Group, user *models.User) bool {
 		return true
 	}
 
-	return models.UserGroups().
+	ret := models.UserGroups().
 		Where("group_id", group.Id).
 		Where("user_id", user.Id).
 		Where("status", models.InviteStatusJoined).
 		Count() > 0
+	return ret
 }
