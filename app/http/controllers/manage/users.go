@@ -10,12 +10,16 @@ import (
 )
 
 func GetUsers(request contracts.HttpRequest) any {
+	name := request.GetString("name")
+	perPage := request.Int64Optional("pageSize", 10)
+	page := request.Int64Optional("current", 1)
 	list, total := models.Users().
 		OrderByDesc("id").
-		When(request.GetString("name") != "", func(q contracts.Query[models.User]) contracts.Query[models.User] {
-			return q.Where("name", "like", "%"+request.GetString("name")+"%")
+		When(name != "", func(q contracts.Query[models.User]) contracts.Query[models.User] {
+			return q.Where("name", "like", "%"+name+"%")
 		}).
-		Paginate(request.Int64Optional("pageSize", 10), request.Int64Optional("current", 1))
+		Paginate(perPage, page)
+
 	return contracts.Fields{
 		"total": total,
 		"data":  list.ToArray(),
@@ -25,7 +29,10 @@ func GetUsers(request contracts.HttpRequest) any {
 func CreateUser(request requests.CreateUserRequest) any {
 	validation.VerifyForm(request)
 
-	newUser, err := usecase.CreateUser(request.GetString("username"), request.GetString("password"), request.GetString("role"))
+	userName := request.GetString("username")
+	passwd := request.GetString("password")
+	role := request.GetString("role")
+	newUser, err := usecase.CreateUser(userName, passwd, role)
 	if err != nil {
 		return contracts.Fields{"msg": "创建用户失败：" + err.Error()}
 	}
@@ -35,7 +42,8 @@ func CreateUser(request requests.CreateUserRequest) any {
 }
 
 func DeleteUsers(request contracts.HttpRequest) any {
-	err := usecase.DeleteUsers(request.Get("id"))
+	id := request.Get("id")
+	err := usecase.DeleteUsers(id)
 
 	if err != nil {
 		return contracts.Fields{"msg": err.Error()}
@@ -47,9 +55,11 @@ func DeleteUsers(request contracts.HttpRequest) any {
 func UpdateUser(request contracts.HttpRequest, hash contracts.Hasher) any {
 	fields := request.Fields()
 	if fields["password"] != nil {
-		fields["password"] = hash.Make(utils.ToString(fields["password"], ""), nil)
+		hashPwd := hash.Make(utils.ToString(fields["password"], ""), nil)
+		fields["password"] = hashPwd
 	}
-	err := usecase.UpdateUser(request.Get("id"), fields)
+	id := request.Get("id")
+	err := usecase.UpdateUser(id, fields)
 
 	if err != nil {
 		return contracts.Fields{"msg": err.Error()}
