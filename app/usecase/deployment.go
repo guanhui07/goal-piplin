@@ -52,10 +52,7 @@ func CreateDeployment(project *models.Project, version, comment string, params m
 	results := make([]models.CommandResult, 0)
 	commands := models.Commands().Where("project_id", project.Id).OrderByDesc("sort").Get()
 	servers := make([]models.Server, 0)
-	models.ProjectEnvironments().
-		Where("project_id", project.Id).
-		WhereIn("id", environmentsParam).
-		Get().Foreach(func(i int, environment *models.ProjectEnvironment) {
+	logic := func(i int, environment *models.ProjectEnvironment) {
 		for _, server := range environment.Settings.Servers {
 			if !server.Disabled {
 				server.Environment = environment.Id
@@ -72,7 +69,11 @@ func CreateDeployment(project *models.Project, version, comment string, params m
 				}
 			}
 		})
-	})
+	}
+	models.ProjectEnvironments().
+		Where("project_id", project.Id).
+		WhereIn("id", environmentsParam).
+		Get().Foreach(logic)
 
 	results = append(results, models.CommandResult{Step: models.Init, Servers: makeCommandOutputs(servers)})
 
