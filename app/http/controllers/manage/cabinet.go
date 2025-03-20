@@ -10,10 +10,12 @@ func GetCabinets(request contracts.HttpRequest, guard contracts.Guard) any {
 	user := guard.User().(*models.User)
 	perPageSize := request.Int64Optional("perPageSize", 10)
 	page := request.Int64Optional("current", 1)
+	name := request.GetString("name")
+
 	list, total := models.Cabinets().
 		OrderByDesc("id").
-		When(request.GetString("name") != "", func(q contracts.Query[models.Cabinet]) contracts.Query[models.Cabinet] {
-			return q.Where("name", "like", "%"+request.GetString("name")+"%")
+		When(name != "", func(q contracts.Query[models.Cabinet]) contracts.Query[models.Cabinet] {
+			return q.Where("name", "like", "%"+name+"%")
 		}).
 		When(user.Role != "admin", func(q contracts.Query[models.Cabinet]) contracts.Query[models.Cabinet] {
 			return q.Where("creator_id", user.Id)
@@ -26,7 +28,9 @@ func GetCabinets(request contracts.HttpRequest, guard contracts.Guard) any {
 }
 
 func CreateCabinet(request contracts.HttpRequest, guard contracts.Guard) any {
-	cabinet, err := usecase.CreateCabinet(guard.GetId(), request.GetString("name"), request.Get("settings"))
+	name := request.GetString("name")
+	settings := request.Get("settings")
+	cabinet, err := usecase.CreateCabinet(guard.GetId(), name, settings)
 
 	if err != nil {
 		return contracts.Fields{"msg": err.Error()}
@@ -36,7 +40,10 @@ func CreateCabinet(request contracts.HttpRequest, guard contracts.Guard) any {
 }
 
 func UpdateCabinet(request contracts.HttpRequest) any {
-	err := usecase.UpdateCabinet(request.Get("id"), request.GetString("name"), request.Get("settings"))
+	id := request.Get("id")
+	name := request.GetString("name")
+	settings := request.Get("settings")
+	err := usecase.UpdateCabinet(id, name, settings)
 
 	if err != nil {
 		return contracts.Fields{"msg": err.Error()}
@@ -46,7 +53,8 @@ func UpdateCabinet(request contracts.HttpRequest) any {
 }
 
 func DeleteCabinet(request contracts.HttpRequest) any {
-	err := usecase.DeleteCabinet(request.Get("id"))
+	id := request.Get("id")
+	err := usecase.DeleteCabinet(id)
 
 	if err != nil {
 		return contracts.Fields{"msg": err.Error()}
