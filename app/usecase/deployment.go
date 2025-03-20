@@ -124,14 +124,15 @@ func RollbackDeployment(project *models.Project, deployment *models.Deployment, 
 		steps = append(steps, scriptFunc(before, true))
 	}
 	if len(commands) > 0 {
+		logic := func(i int, command *models.Command) {
+			steps = append(steps, scriptFunc(command.Script, true))
+		}
 		models.Commands().
 			Where("project_id", project.Id).
 			Where("step", models.BeforeRelease).
 			WhereIn("id", commands).
 			Get().
-			Foreach(func(i int, command *models.Command) {
-				steps = append(steps, scriptFunc(command.Script, true))
-			})
+			Foreach(logic)
 	}
 
 	steps = append(steps, release)
