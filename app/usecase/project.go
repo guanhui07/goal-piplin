@@ -191,7 +191,9 @@ func DeleteProject(project *models.Project) error {
 
 // HasProjectPermission 判断用户是否存在指定项目的权限
 func HasProjectPermission(project *models.Project, user *models.User) bool {
-	if user.Role == models.UserRoleAdmin || project.CreatorId == utils.ToInt(user.Id, 0) {
+	isUserRoleAdmin := user.Role == models.UserRoleAdmin
+	boolIsInt := project.CreatorId == utils.ToInt(user.Id, 0)
+	if isUserRoleAdmin || boolIsInt {
 		return true
 	}
 
