@@ -19,7 +19,10 @@ func DeleteGroups(id any) error {
 }
 
 func UpdateGroup(id any, fields contracts.Fields) error {
-	if models.Groups().Where("id", "!=", id).Where("name", fields["name"]).Count() > 0 {
+	count := models.Groups().Where("id", "!=", id).
+		Where("name", fields["name"]).
+		Count()
+	if count > 0 {
 		return errors.New("分组名称")
 	}
 
