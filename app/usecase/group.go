@@ -34,7 +34,9 @@ func UpdateGroup(id any, fields contracts.Fields) error {
 
 // HasGroupPermission 判断用户是否存在指定分组的权限
 func HasGroupPermission(group *models.Group, user *models.User) bool {
-	if user.Role == models.UserRoleAdmin || group.CreatorId == utils.ToInt(user.Id, 0) {
+	isUserRoleAdmin := user.Role == models.UserRoleAdmin
+	boolIsTrue := group.CreatorId == utils.ToInt(user.Id, 0)
+	if isUserRoleAdmin || boolIsTrue {
 		return true
 	}
 
