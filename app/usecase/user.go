@@ -9,7 +9,8 @@ import (
 )
 
 func CreateUser(name, password, role string) (*models.User, error) {
-	if models.Users().Where("username", name).Count() > 0 {
+	count := models.Users().Where("username", name).Count()
+	if count > 0 {
 		return nil, errors.New("用户名已存在")
 	}
 
@@ -24,7 +25,8 @@ func CreateUser(name, password, role string) (*models.User, error) {
 }
 
 func DeleteUsers(id any) error {
-	if models.Projects().Where("creator_id", id).Count() > 0 {
+	count := models.Projects().Where("creator_id", id).Count()
+	if count > 0 {
 		return errors.New("不能删除该用户，请先删除该用户创建的项目。")
 	}
 	_, err := models.Users().Where("id", id).DeleteE()
@@ -32,7 +34,9 @@ func DeleteUsers(id any) error {
 }
 
 func UpdateUser(id any, fields contracts.Fields) error {
-	_, err := models.Users().Where("id", id).UpdateE(utils.OnlyFields(fields, "nickname", "password", "avatar"))
+	_, err := models.Users().
+		Where("id", id).
+		UpdateE(utils.OnlyFields(fields, "nickname", "password", "avatar"))
 
 	return err
 }

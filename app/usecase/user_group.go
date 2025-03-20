@@ -7,10 +7,11 @@ import (
 )
 
 func CreateUserGroup(groupId, userId int) (*models.UserGroup, error) {
-	if models.UserGroups().
+	count := models.UserGroups().
 		Where("group_id", groupId).
 		Where("user_id", userId).
-		Count() > 0 {
+		Count()
+	if count > 0 {
 		return nil, errors.New("邀请失败，您已邀请该用户")
 	}
 	return models.UserGroups().CreateE(contracts.Fields{
@@ -21,9 +22,11 @@ func CreateUserGroup(groupId, userId int) (*models.UserGroup, error) {
 }
 
 func UpdateUserGroup(project *models.UserGroup, status string) error {
-	_, err := models.UserGroups().Where("id", project.Id).UpdateE(contracts.Fields{
-		"status": status,
-	})
+	_, err := models.UserGroups().
+		Where("id", project.Id).
+		UpdateE(contracts.Fields{
+			"status": status,
+		})
 	return err
 }
 
