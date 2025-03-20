@@ -7,10 +7,11 @@ import (
 )
 
 func CreateUserProject(projectId, userId int) (*models.UserProject, error) {
-	if models.UserProjects().
+	count := models.UserProjects().
 		Where("project_id", projectId).
 		Where("user_id", userId).
-		Count() > 0 {
+		Count()
+	if count > 0 {
 		return nil, errors.New("邀请失败，您已邀请该用户")
 	}
 	return models.UserProjects().CreateE(contracts.Fields{
@@ -21,7 +22,8 @@ func CreateUserProject(projectId, userId int) (*models.UserProject, error) {
 }
 
 func UpdateUserProject(project *models.UserProject, status string) error {
-	_, err := models.UserProjects().Where("id", project.Id).UpdateE(contracts.Fields{
+	_, err := models.UserProjects().
+		Where("id", project.Id).UpdateE(contracts.Fields{
 		"status": status,
 	})
 	return err
