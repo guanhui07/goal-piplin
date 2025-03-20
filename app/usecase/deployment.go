@@ -60,15 +60,16 @@ func CreateDeployment(project *models.Project, version, comment string, params m
 			}
 		}
 
-		models.Cabinets().WhereIn("id", environment.Settings.Cabinets).
-			Get().Foreach(func(i int, cabinet *models.Cabinet) {
+		logicFunc := func(i int, cabinet *models.Cabinet) {
 			for _, server := range cabinet.Settings {
 				if !server.Disabled {
 					server.Environment = environment.Id
 					servers = append(servers, server)
 				}
 			}
-		})
+		}
+		models.Cabinets().WhereIn("id", environment.Settings.Cabinets).
+			Get().Foreach(logicFunc)
 	}
 	models.ProjectEnvironments().
 		Where("project_id", project.Id).
