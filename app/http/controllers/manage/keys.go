@@ -33,7 +33,7 @@ func CreateKey(request contracts.HttpRequest, guard contracts.Guard) any {
 	if err != nil {
 		panic(err)
 	}
-	return contracts.Fields{
+	ret := contracts.Fields{
 		"data": models.Keys().Create(contracts.Fields{
 			"creator_id":  guard.GetId(),
 			"name":        request.GetString("name"),
@@ -41,10 +41,12 @@ func CreateKey(request contracts.HttpRequest, guard contracts.Guard) any {
 			"private_key": privateKey,
 		}),
 	}
+	return ret
 }
 
 func DeleteKeys(request contracts.HttpRequest) any {
-	err := usecase.DeleteKeys(request.Get("id"))
+	id := request.Get("id")
+	err := usecase.DeleteKeys(id)
 
 	if err != nil {
 		return contracts.Fields{"msg": err.Error()}
@@ -54,7 +56,8 @@ func DeleteKeys(request contracts.HttpRequest) any {
 }
 
 func UpdateKey(request contracts.HttpRequest) any {
-	err := usecase.UpdateKey(request.Get("id"), request.Fields())
+	id := request.Get("id")
+	err := usecase.UpdateKey(id, request.Fields())
 
 	if err != nil {
 		return contracts.Fields{"msg": err.Error()}
