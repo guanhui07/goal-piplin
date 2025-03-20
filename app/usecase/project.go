@@ -201,9 +201,10 @@ func HasProjectPermission(project *models.Project, user *models.User) bool {
 		return true
 	}
 
-	return models.UserProjects().
+	ret := models.UserProjects().
 		Where("project_id", project.Id).
 		Where("user_id", user.Id).
 		Where("status", models.InviteStatusJoined).
 		Count() > 0
+	return ret
 }
