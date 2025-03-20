@@ -26,7 +26,8 @@ func UpdateGroup(id any, fields contracts.Fields) error {
 		return errors.New("分组名称")
 	}
 
-	_, err := models.Groups().Where("id", id).UpdateE(utils.OnlyFields(fields, "name"))
+	_, err := models.Groups().Where("id", id).
+		UpdateE(utils.OnlyFields(fields, "name"))
 
 	return err
 }
