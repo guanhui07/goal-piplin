@@ -16,7 +16,9 @@ func CreateProject(creatorId string, fields contracts.Fields) (*models.Project, 
 	var key *models.Key
 	var err error
 
-	if models.Projects().Where("name", fields["name"]).Count() > 0 {
+	count := models.Projects().
+		Where("name", fields["name"]).Count()
+	if count > 0 {
 		return nil, errors.New("项目已存在")
 	}
 

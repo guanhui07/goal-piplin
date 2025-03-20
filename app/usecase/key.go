@@ -23,7 +23,8 @@ func CreateKey(creatorId string, name string) (*models.Key, error) {
 }
 
 func DeleteKeys(id any) error {
-	if models.Projects().WhereIn("key_id", id).Count() > 0 {
+	count := models.Projects().WhereIn("key_id", id).Count()
+	if count > 0 {
 		return errors.New("不能删除该密钥，因为有项目正在使用此公钥。")
 	}
 	_, err := models.Keys().WhereIn("id", id).DeleteE()
@@ -31,11 +32,14 @@ func DeleteKeys(id any) error {
 }
 
 func UpdateKey(id any, fields contracts.Fields) error {
-	if models.Keys().Where("id", "!=", id).Where("name", fields["name"]).Count() > 0 {
+	count := models.Keys().Where("id", "!=", id).
+		Where("name", fields["name"]).Count()
+	if count > 0 {
 		return errors.New("密钥名称已存在")
 	}
 
-	_, err := models.Keys().Where("id", id).UpdateE(utils.OnlyFields(fields, "name", "public_key", "private_key"))
+	_, err := models.Keys().Where("id", id).
+		UpdateE(utils.OnlyFields(fields, "name", "public_key", "private_key"))
 
 	return err
 }
