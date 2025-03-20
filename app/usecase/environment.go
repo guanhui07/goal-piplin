@@ -11,10 +11,11 @@ import (
 )
 
 func CreateEnvironment(name string, projectId int) (*models.ProjectEnvironment, error) {
-	if models.ProjectEnvironments().
+	count := models.ProjectEnvironments().
 		Where("project_id", projectId).
 		Where("name", name).
-		Count() > 0 {
+		Count()
+	if count > 0 {
 		return nil, errors.New("环境名称已存在！")
 	}
 
@@ -30,11 +31,12 @@ func CreateEnvironment(name string, projectId int) (*models.ProjectEnvironment, 
 
 func UpdateEnvironment(id any, name string, settings any) error {
 	env := models.ProjectEnvironments().Find(id)
-	if models.ProjectEnvironments().
+	count := models.ProjectEnvironments().
 		Where("project_id", env.ProjectId).
 		Where("id", "!=", id).
 		Where("name", name).
-		Count() > 0 {
+		Count()
+	if count > 0 {
 		return errors.New("环境名称已存在！")
 	}
 
